@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gnanamani Hospital — Our Doctors</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<style>
+:root{
+  --accent:#2582A1;
+  --accent-dark:#1c6580;
+  --accent-light:#e5f2f6;
+  --on-accent:#ffffff;
+  --bg:#ffffff;
+  --card:#ffffff;
+  --text:#1b2b31;
+  --muted:#647882;
+  --border:#dbe9ee;
+  --shadow:0 2px 10px rgba(20,60,75,0.08);
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1b20; --card:#16262c; --text:#eaf4f7; --muted:#9db2ba; --border:#1f333b; --accent-light:#193039;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1b20; --card:#16262c; --text:#eaf4f7; --muted:#9db2ba; --border:#1f333b; --accent-light:#193039;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:border-box;}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);}
+header{background:linear-gradient(135deg,var(--accent),var(--accent-dark));color:var(--on-accent);padding:22px 16px calc(22px + env(safe-area-inset-top,0px));padding-top:calc(22px + env(safe-area-inset-top,0px));text-align:center;box-shadow:var(--shadow);}
+header h1{margin:0 0 6px;font-size:clamp(22px,5vw,32px);letter-spacing:.3px;}
+header .sub{font-size:14px;opacity:.85;margin-bottom:10px;}
+.call-btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent-dark);color:var(--on-accent);padding:10px 18px;border-radius:30px;text-decoration:none;font-weight:600;font-size:15px;box-shadow:0 3px 8px rgba(0,0,0,.15);}
+.call-btn:active{transform:scale(.97);}
+#general-notifications{max-width:900px;margin:14px auto 0;padding:0 16px;}
+.notif-banner{background:var(--accent-light);border:1px solid var(--accent);border-radius:10px;padding:10px 14px;margin-bottom:8px;font-size:14px;color:var(--text);}
+main{max-width:1000px;margin:0 auto;padding:24px 16px 60px;}
+main h2{font-size:20px;margin:0 0 16px;color:var(--text);}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;}
+.tile{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;box-shadow:var(--shadow);transition:box-shadow .12s;text-align:left;}
+.tile:hover{box-shadow:0 6px 16px rgba(40,50,10,.14);border-color:var(--accent);}
+.tile-head{display:flex;gap:14px;align-items:center;margin-bottom:10px;}
+.avatar{width:64px;height:64px;border-radius:50%;flex-shrink:0;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;object-fit:cover;overflow:hidden;}
+.avatar img{width:100%;height:100%;object-fit:cover;}
+.tile h3{margin:0 0 3px;font-size:17px;}
+.tile .desig{font-size:13px;color:var(--muted);}
+.badge{display:inline-block;font-size:11px;background:var(--accent-light);color:var(--accent-dark);border-radius:20px;padding:3px 10px;font-weight:600;margin-bottom:8px;}
+.tile .quali,.tile .regno{font-size:12px;color:var(--muted);margin-bottom:4px;}
+.tile .intro{font-size:13px;line-height:1.5;color:var(--text);margin:8px 0 12px;}
+.schedule-btn{display:block;width:100%;background:var(--accent);color:var(--on-accent);border:none;padding:11px;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;}
+#empty-state, #load-error{text-align:center;color:var(--muted);padding:30px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(10,15,0,.55);display:flex;align-items:flex-end;justify-content:center;z-index:50;}
+.modal-overlay.hidden{display:none;}
+.modal{background:var(--card);width:100%;max-width:640px;max-height:88vh;overflow-y:auto;border-radius:18px 18px 0 0;padding:22px 18px calc(22px + env(safe-area-inset-bottom,0px));position:relative;}
+@media(min-width:700px){.modal-overlay{align-items:center;}.modal{border-radius:18px;}}
+.modal-close{position:absolute;top:12px;right:14px;background:var(--accent-light);border:none;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;color:var(--text);}
+.dr-head{display:flex;gap:14px;align-items:center;margin-bottom:12px;}
+.dr-head .avatar{margin:0;width:64px;height:64px;font-size:20px;flex-shrink:0;}
+.dr-head h2{margin:0 0 3px;font-size:19px;}
+.dr-head .desig{color:var(--muted);font-size:13px;}
+.section-label{font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--accent-dark);font-weight:700;margin:18px 0 8px;}
+.intro{font-size:14px;line-height:1.5;color:var(--text);}
+.meta-row{font-size:13px;color:var(--muted);margin-top:4px;}
+.slot{display:flex;justify-content:space-between;gap:10px;background:var(--accent-light);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:14px;}
+.slot .d{font-weight:600;}
+.slot .t{color:var(--accent-dark);font-weight:600;white-space:nowrap;}
+.more-btn,.retry-btn{display:block;margin:10px auto 0;background:var(--accent);color:var(--on-accent);border:none;padding:9px 20px;border-radius:24px;font-weight:700;cursor:pointer;font-size:14px;}
+.no-data{font-size:13px;color:var(--muted);padding:6px 0;}
+.notif-item{border-left:3px solid var(--accent);padding:8px 12px;background:var(--accent-light);border-radius:0 8px 8px 0;font-size:13px;margin-bottom:8px;}
+.alert-modal .modal{max-width:420px;text-align:center;border-radius:18px;}
+.alert-icon{font-size:34px;margin-bottom:6px;}
+.alert-modal h2{margin:0 0 12px;font-size:18px;}
+.alert-item{background:var(--accent-light);border:1px solid var(--accent);border-radius:10px;padding:12px 14px;margin-bottom:10px;text-align:left;font-size:14px;}
+.alert-item .who{font-weight:700;color:var(--accent-dark);font-size:12px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;}
+.alert-dismiss{display:block;width:100%;margin-top:6px;background:var(--accent);color:var(--on-accent);border:none;padding:11px;border-radius:10px;font-weight:700;cursor:pointer;font-size:15px;}
+</style>
+</head>
+<body>
+<header>
+  <h1>Gnanamani Hospital</h1>
+  <a class="call-btn" href="tel:+919159181264">📞 Appointments: +91 9159181264</a>
+</header>
+
+<div id="general-notifications"></div>
+
+<main>
+  <h2>Our Doctors</h2>
+  <div id="doctor-grid" class="grid"></div>
+  <p style="font-size:12px;color:var(--muted);text-align:center;margin-top:14px;"></p>
+  <div id="empty-state" style="display:none;">No doctors found.</div>
+  <div id="load-error" style="display:none;">Couldn't load doctor data right now. <button class="retry-btn" onclick="loadAll()">Retry</button></div>
+</main>
+
+<div id="doctor-modal" class="modal-overlay hidden">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<div id="alert-modal" class="modal-overlay alert-modal hidden">
+  <div class="modal">
+    <div class="alert-icon">🔔</div>
+    <h2>Notice</h2>
+    <div id="alert-content"></div>
+    <button class="alert-dismiss" onclick="closeAlertModal()">Got it</button>
+  </div>
+</div>
+
+<script>
+var DOCTORS_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQIZezkp8tde6SmBMDS2YdGqoQZSXC2NUz7PGe6pRjNAew1wanAVgVhFWBCV0_iB6oEY7FGgEKQoL-m/pub?gid=0&single=true&output=csv";
+var VISITING_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQIZezkp8tde6SmBMDS2YdGqoQZSXC2NUz7PGe6pRjNAew1wanAVgVhFWBCV0_iB6oEY7FGgEKQoL-m/pub?gid=1276025793&single=true&output=csv";
+var NOTIF_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vQIZezkp8tde6SmBMDS2YdGqoQZSXC2NUz7PGe6pRjNAew1wanAVgVhFWBCV0_iB6oEY7FGgEKQoL-m/pub?gid=472322523&single=true&output=csv";
+
+var doctors=[], visiting=[], notifications=[];
+
+function parseCSV(text){
+  var rows=[], row=[], field="", inQuotes=false;
+  text = text.replace(/\r\n/g,"\n");
+  for(var i=0;i<text.length;i++){
+    var c=text[i];
+    if(inQuotes){
+      if(c=='"'){
+        if(text[i+1]=='"'){ field+='"'; i++; } else { inQuotes=false; }
+      } else field+=c;
+    } else {
+      if(c=='"') inQuotes=true;
+      else if(c==','){ row.push(field); field=""; }
+      else if(c=='\n'){ row.push(field); rows.push(row); row=[]; field=""; }
+      else field+=c;
+    }
+  }
+  if(field.length || row.length){ row.push(field); rows.push(row); }
+  if(!rows.length) return [];
+  var headers = rows[0].map(function(h){return h.trim();});
+  var out=[];
+  for(var r=1;r<rows.length;r++){
+    if(rows[r].length===1 && rows[r][0]==="") continue;
+    var obj={};
+    for(var c2=0;c2<headers.length;c2++){ obj[headers[c2]] = (rows[r][c2]||"").trim(); }
+    out.push(obj);
+  }
+  return out;
+}
+
+function todayMidnight(){ var d=new Date(); d.setHours(0,0,0,0); return d; }
+
+function parseMDY(str){
+  if(!str) return null;
+  var p=str.split("/");
+  if(p.length!==3) return null;
+  var d=new Date(parseInt(p[2],10), parseInt(p[0],10)-1, parseInt(p[1],10));
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function formatDate(d){
+  return d.toLocaleDateString('en-IN',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+}
+
+function shortTime(t){
+  if(!t) return "";
+  var m = t.match(/(\d{1,2}):(\d{2})(?::\d{2})?\s*(AM|PM)?/i);
+  if(!m) return t;
+  return m[1]+":"+m[2]+(m[3]?" "+m[3].toUpperCase():"");
+}
+
+function resolveImageUrl(url){
+  if(!url) return url;
+  var m = url.match(/\/file\/d\/([^/]+)/) || url.match(/[?&]id=([^&]+)/);
+  if(m && m[1]) return "https://drive.google.com/thumbnail?id="+m[1]+"&sz=w400";
+  return url;
+}
+
+function initials(name){
+  var n=(name||"").replace(/^Dr\.?\s*/i,"");
+  var parts=n.split(/[\s.]+/).filter(Boolean);
+  return ((parts[0]||"?")[0]+(parts[1]?parts[1][0]:"")).toUpperCase();
+}
+
+function loadAll(){
+  $("#load-error").hide();
+  $.when($.get(DOCTORS_URL),$.get(VISITING_URL),$.get(NOTIF_URL))
+    .done(function(d1,d2,d3){
+      doctors = parseCSV(d1[0]).filter(function(d){return (d.Active||"").toUpperCase()==="TRUE";});
+      doctors.sort(function(a,b){return (parseInt(a["Show Order"])||0)-(parseInt(b["Show Order"])||0);});
+      visiting = parseCSV(d2[0]);
+      notifications = parseCSV(d3[0]);
+      renderGeneralNotifications();
+      renderDoctors();
+      showAlertPopup();
+    })
+    .fail(function(){ $("#load-error").show(); });
+}
+
+function notifActive(n){
+  if(!n["Date Show Till"]) return true;
+  var till = parseMDY(n["Date Show Till"]);
+  return !till || till >= todayMidnight();
+}
+
+function renderGeneralNotifications(){
+  var box=$("#general-notifications").empty();
+  var gen = notifications.filter(function(n){ return !n["Doctor ID"] && notifActive(n) && (n.Type||"").toLowerCase()!=="alert"; });
+  gen.forEach(function(n){
+    $('<div class="notif-banner"></div>').text(n.Text).appendTo(box);
+  });
+}
+
+function showAlertPopup(){
+  var alerts = notifications.filter(function(n){ return notifActive(n) && (n.Type||"").toLowerCase()==="alert"; });
+  if(!alerts.length) return;
+  var box=$("#alert-content").empty();
+  alerts.forEach(function(n){
+    var item=$('<div class="alert-item"></div>');
+    if(n["Doctor ID"]){
+      var doc = doctors.filter(function(d){return d.ID===n["Doctor ID"];})[0];
+      if(doc) item.append($('<div class="who"></div>').text(doc.Name));
+    }
+    item.append($('<div></div>').text(n.Text));
+    box.append(item);
+  });
+  $("#alert-modal").removeClass('hidden');
+}
+
+function closeAlertModal(){ $("#alert-modal").addClass('hidden'); }
+
+function renderDoctors(){
+  var grid=$("#doctor-grid").empty();
+  if(!doctors.length){ $("#empty-state").show(); return; }
+  $("#empty-state").hide();
+  doctors.forEach(function(doc){
+    var tile=$('<div class="tile"></div>');
+
+    var head=$('<div class="tile-head"></div>');
+    var avatar=$('<div class="avatar"></div>');
+    if(doc.Image){ avatar.append($('<img>').attr('src',resolveImageUrl(doc.Image)).on('error',function(){$(this).remove(); avatar.text(initials(doc.Name));})); }
+    else { avatar.text(initials(doc.Name)); }
+    head.append(avatar);
+    var headText=$('<div></div>');
+    headText.append($('<h3></h3>').text(doc.Name));
+    headText.append($('<div class="desig"></div>').text(doc.Designation||""));
+    head.append(headText);
+    tile.append(head);
+
+    if(doc.Specialization) tile.append($('<span class="badge"></span>').text(doc.Specialization));
+    if(doc.Qualification) tile.append($('<div class="quali"></div>').text(doc.Qualification));
+    if(doc["Reg No"]) tile.append($('<div class="regno"></div>').text("Reg No: "+doc["Reg No"]));
+    if(doc.Intro) tile.append($('<div class="intro"></div>').text(doc.Intro));
+
+    tile.append($('<button class="schedule-btn">View Visiting Hours</button>').on('click',function(){ openDoctor(doc); }));
+
+    grid.append(tile);
+  });
+}
+
+function expandVisiting(doctorId){
+  var rows = visiting.filter(function(v){ return v["Doctors ID"]===doctorId; });
+  var entries=[];
+  rows.forEach(function(r){
+    var start=parseMDY(r["Start Date"]), end=parseMDY(r["End Date"]) || start;
+    if(!start) return;
+    var d=new Date(start), count=0;
+    while(d<=end && count<120){
+      entries.push({date:new Date(d), start:r["Start Time"], end:r["End Time"]});
+      d.setDate(d.getDate()+1); count++;
+    }
+  });
+  var today=todayMidnight();
+  entries = entries.filter(function(e){ return e.date>=today; });
+  entries.sort(function(a,b){ return a.date-b.date; });
+  return entries;
+}
+
+function renderSlots(entries, container){
+  container.empty();
+  if(!entries.length){ container.append('<div class="no-data">No upcoming visiting slots scheduled.</div>'); return; }
+  entries.forEach(function(e){
+    var slot=$('<div class="slot"></div>');
+    slot.append($('<span class="d"></span>').text(formatDate(e.date)));
+    slot.append($('<span class="t"></span>').text(shortTime(e.start)+" – "+shortTime(e.end)));
+    container.append(slot);
+  });
+}
+
+function openDoctor(doc){
+  var content=$("#modal-content").empty();
+  var head=$('<div class="dr-head"></div>');
+  var avatar=$('<div class="avatar"></div>');
+  if(doc.Image){ avatar.append($('<img>').attr('src',resolveImageUrl(doc.Image)).on('error',function(){$(this).remove(); avatar.text(initials(doc.Name));})); }
+  else { avatar.text(initials(doc.Name)); }
+  head.append(avatar);
+  var headText=$('<div></div>');
+  headText.append($('<h2></h2>').text(doc.Name));
+  headText.append($('<div class="desig"></div>').text(doc.Designation||""));
+  head.append(headText);
+  content.append(head);
+
+  content.append('<div class="section-label">This Week\'s Visiting Schedule</div>');
+  var slotBox=$('<div></div>'); content.append(slotBox);
+  var allEntries = expandVisiting(doc.ID);
+  var today=todayMidnight();
+  var weekCutoff = new Date(today); weekCutoff.setDate(weekCutoff.getDate()+6);
+  var weekEntries = allEntries.filter(function(e){ return e.date<=weekCutoff; });
+  renderSlots(weekEntries, slotBox);
+
+  if(allEntries.length > weekEntries.length){
+    var moreBtn=$('<button class="more-btn">Show all upcoming dates</button>').on('click',function(){
+      renderSlots(allEntries, slotBox);
+      moreBtn.remove();
+    });
+    content.append(moreBtn);
+  }
+
+  var docNotifs = notifications.filter(function(n){ return n["Doctor ID"]===doc.ID && notifActive(n); });
+  if(docNotifs.length){
+    content.append('<div class="section-label">Notifications</div>');
+    var nbox=$('<div></div>');
+    docNotifs.forEach(function(n){ nbox.append($('<div class="notif-item"></div>').text(n.Text)); });
+    content.append(nbox);
+  }
+
+  $("#doctor-modal").removeClass('hidden');
+}
+
+function closeModal(){ $("#doctor-modal").addClass('hidden'); }
+
+$(document).ready(function(){
+  loadAll();
+  $("#doctor-modal").on('click',function(e){ if(e.target===this) closeModal(); });
+  $("#alert-modal").on('click',function(e){ if(e.target===this) closeAlertModal(); });
+});
+</script>
+</body>
+</html>
